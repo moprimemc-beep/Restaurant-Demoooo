@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const siteUrl = "https://trattoria-bellavista.example.com";
+import { siteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/impressum", "/datenschutz"],
+        disallow: ["/en/impressum", "/en/datenschutz", "/de/impressum", "/de/datenschutz"],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

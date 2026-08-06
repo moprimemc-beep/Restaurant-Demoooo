@@ -1,9 +1,13 @@
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/motion/Reveal";
-import { restaurant } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import { localizedHref, type Locale } from "@/lib/i18n";
 
-export default function ReservationCta() {
+export default function ReservationCta({ locale }: { locale: Locale }) {
+  const content = getContent(locale);
+  const { reservationCta } = content.home;
+
   return (
     <section className="tone-dark relative overflow-hidden bg-secondary py-24 text-cream sm:py-32">
       <div
@@ -17,25 +21,23 @@ export default function ReservationCta() {
       <Container className="relative text-center">
         <Reveal>
           <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-            Reservierung
+            {reservationCta.eyebrow}
           </span>
           <h2 className="mx-auto mt-5 max-w-2xl text-balance font-display text-4xl italic leading-[1.1] text-cream sm:text-5xl">
-            Zeit für ein gutes Essen —
-            <br className="hidden sm:block" /> reservieren Sie Ihren Tisch.
+            {reservationCta.title}
           </h2>
           <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-cream/80">
-            Ob zu zweit oder mit der ganzen Familie — wir freuen uns auf Ihren
-            Besuch in der Trattoria Bellavista.
+            {reservationCta.description}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button href="/reservierung" variant="primary">
-              Tisch reservieren
+            <Button href={localizedHref(locale, "/reservierung")} variant="primary">
+              {content.common.reserveCta}
             </Button>
             <a
-              href={restaurant.phone.href}
+              href={content.restaurant.phone.href}
               className="text-sm font-semibold uppercase tracking-wide text-cream/80 underline decoration-cream/30 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
             >
-              oder anrufen: {restaurant.phone.display}
+              {reservationCta.orCallPrefix} {content.restaurant.phone.display}
             </a>
           </div>
         </Reveal>

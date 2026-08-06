@@ -1,24 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import Field, { inputClasses } from "@/components/forms/Field";
 import Button from "@/components/ui/Button";
-import { reservationSchema, type ReservationValues } from "@/lib/schemas";
+import { createReservationSchema, type ReservationValues } from "@/lib/schemas";
+import { localizedHref } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 
 const guestOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
 
 export default function ReservationForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const { locale, content } = useLocale();
+  const form = content.reservationPage.form;
+  const schema = useMemo(() => createReservationSchema(form.errors), [form.errors]);
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<ReservationValues>({
-    resolver: zodResolver(reservationSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: "",
       guests: "2",
@@ -47,15 +53,10 @@ export default function ReservationForm() {
         className="flex flex-col items-center gap-4 rounded-[1.5rem] bg-cream p-10 text-center shadow-card"
       >
         <CheckCircle2 className="size-10 text-secondary" aria-hidden="true" />
-        <h3 className="font-display text-2xl text-ink">Anfrage erfasst</h3>
-        <p className="max-w-md text-sm leading-relaxed text-ink-soft">
-          Vielen Dank für Ihre Reservierungsanfrage. Da dies eine Demo-Website ohne
-          angebundenes Buchungssystem ist, wurde keine echte Nachricht versendet — in
-          einer produktiven Version würden Sie hier eine Bestätigung per E-Mail
-          erhalten.
-        </p>
+        <h3 className="font-display text-2xl text-ink">{form.successTitle}</h3>
+        <p className="max-w-md text-sm leading-relaxed text-ink-soft">{form.successText}</p>
         <Button variant="secondary" onClick={() => setStatus("idle")}>
-          Neue Anfrage stellen
+          {form.successButton}
         </Button>
       </div>
     );
@@ -64,7 +65,7 @@ export default function ReservationForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2">
-        <Field id="name" label="Name" required error={errors.name?.message}>
+        <Field id="name" label={form.name} required error={errors.name?.message}>
           <input
             id="name"
             type="text"
@@ -76,7 +77,7 @@ export default function ReservationForm() {
           />
         </Field>
 
-        <Field id="guests" label="Personen" required error={errors.guests?.message}>
+        <Field id="guests" label={form.guests} required error={errors.guests?.message}>
           <select
             id="guests"
             className={inputClasses}
@@ -85,13 +86,13 @@ export default function ReservationForm() {
           >
             {guestOptions.map((option) => (
               <option key={option} value={option}>
-                {option} {option === "1" ? "Person" : "Personen"}
+                {option} {option === "1" ? form.guestUnit : form.guestsUnitPlural}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field id="date" label="Datum" required error={errors.date?.message}>
+        <Field id="date" label={form.date} required error={errors.date?.message}>
           <input
             id="date"
             type="date"
@@ -103,7 +104,7 @@ export default function ReservationForm() {
           />
         </Field>
 
-        <Field id="time" label="Uhrzeit" required error={errors.time?.message}>
+        <Field id="time" label={form.time} required error={errors.time?.message}>
           <input
             id="time"
             type="time"
@@ -114,7 +115,7 @@ export default function ReservationForm() {
           />
         </Field>
 
-        <Field id="phone" label="Telefonnummer" required error={errors.phone?.message}>
+        <Field id="phone" label={form.phone} required error={errors.phone?.message}>
           <input
             id="phone"
             type="tel"
@@ -126,7 +127,7 @@ export default function ReservationForm() {
           />
         </Field>
 
-        <Field id="email" label="E-Mail" required error={errors.email?.message}>
+        <Field id="email" label={form.email} required error={errors.email?.message}>
           <input
             id="email"
             type="email"
@@ -139,11 +140,11 @@ export default function ReservationForm() {
         </Field>
       </div>
 
-      <Field id="message" label="Nachricht (optional)" error={errors.message?.message}>
+      <Field id="message" label={form.message} error={errors.message?.message}>
         <textarea
           id="message"
           rows={4}
-          placeholder="Allergien, Anlass oder besondere Wünsche"
+          placeholder={form.messagePlaceholder}
           className={inputClasses}
           aria-invalid={Boolean(errors.message)}
           {...register("message")}
@@ -160,11 +161,11 @@ export default function ReservationForm() {
           {...register("privacy")}
         />
         <label htmlFor="privacy" className="text-sm text-ink-soft">
-          Ich habe die{" "}
-          <a href="/datenschutz" className="underline hover:text-primary">
-            Datenschutzerklärung
+          {form.privacyPrefix}{" "}
+          <a href={localizedHref(locale, "/datenschutz")} className="underline hover:text-primary">
+            {form.privacyLink}
           </a>{" "}
-          gelesen und stimme der Verarbeitung meiner Daten zu.
+          {form.privacySuffix}
         </label>
       </div>
       {errors.privacy && (
@@ -177,10 +178,10 @@ export default function ReservationForm() {
         {status === "submitting" ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            Wird gesendet …
+            {form.submitting}
           </>
         ) : (
-          "Reservierung anfragen"
+          form.submit
         )}
       </Button>
     </form>

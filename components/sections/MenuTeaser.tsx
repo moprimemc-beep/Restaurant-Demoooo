@@ -3,7 +3,8 @@ import { ArrowUpRight, Soup, UtensilsCrossed, Pizza, Beef, Fish, IceCreamCone, W
 import SectionHeading from "@/components/ui/SectionHeading";
 import Container from "@/components/ui/Container";
 import { RevealGroup, RevealItem } from "@/components/motion/RevealGroup";
-import { menu } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import { localizedHref, type Locale } from "@/lib/i18n";
 
 const icons = {
   vorspeisen: Soup,
@@ -15,25 +16,28 @@ const icons = {
   getraenke: Wine,
 };
 
-export default function MenuTeaser() {
+export default function MenuTeaser({ locale }: { locale: Locale }) {
+  const content = getContent(locale);
+  const { menuTeaser } = content.home;
+
   return (
     <section className="tone-dark bg-secondary py-24 text-cream sm:py-32">
       <Container>
         <SectionHeading
-          number="03"
-          eyebrow="Angebot"
-          title="Unsere Speisekarte."
-          description="Von hausgemachter Pasta bis zur Steinofenpizza — sieben Kapitel voller italienischer Küche."
+          number={menuTeaser.number}
+          eyebrow={menuTeaser.eyebrow}
+          title={menuTeaser.title}
+          description={menuTeaser.description}
           tone="light"
         />
 
         <RevealGroup className="mt-14 grid grid-cols-1 divide-y divide-cream/12 border-y border-cream/12 sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4">
-          {menu.map((category) => {
+          {content.menu.map((category) => {
             const Icon = icons[category.id as keyof typeof icons];
             return (
               <RevealItem key={category.id}>
                 <Link
-                  href={`/speisekarte#${category.id}`}
+                  href={`${localizedHref(locale, "/speisekarte")}#${category.id}`}
                   className="group flex h-full flex-col gap-5 px-6 py-8 transition-colors hover:bg-cream/5"
                 >
                   <div className="flex items-center justify-between">
@@ -49,7 +53,7 @@ export default function MenuTeaser() {
                     </p>
                   </div>
                   <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-accent opacity-0 transition-opacity group-hover:opacity-100">
-                    Ansehen
+                    {menuTeaser.viewLabel}
                     <ArrowUpRight className="size-3.5" aria-hidden="true" />
                   </span>
                 </Link>

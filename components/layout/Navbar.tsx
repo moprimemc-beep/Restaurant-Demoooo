@@ -8,15 +8,18 @@ import { AnimatePresence } from "framer-motion";
 import { Menu } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { navigation, restaurant } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { localizedHref } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 import MobileMenu from "@/components/layout/MobileMenu";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const [lastPathname, setLastPathname] = useState(pathname);
+  const { locale, content } = useLocale();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -45,9 +48,9 @@ export default function Navbar() {
         <Container>
           <div className="flex h-20 items-center justify-between sm:h-24">
             <Link
-              href="/"
+              href={localizedHref(locale, "/")}
               className="flex items-center gap-3"
-              aria-label={`${restaurant.name} — Startseite`}
+              aria-label={`${content.restaurant.name} — ${content.navigation[0].label}`}
             >
               <span
                 className={cn(
@@ -84,15 +87,16 @@ export default function Navbar() {
             </Link>
 
             <nav
-              className="hidden items-center gap-9 lg:flex"
-              aria-label="Hauptnavigation"
+              className="hidden items-center gap-8 lg:flex"
+              aria-label={content.common.mainNavLabel}
             >
-              {navigation.map((item) => {
-                const isActive = pathname === item.href;
+              {content.navigation.map((item) => {
+                const href = localizedHref(locale, item.href);
+                const isActive = pathname === href;
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={href}
                     aria-current={isActive ? "page" : undefined}
                     className={cn(
                       "relative text-sm font-semibold uppercase tracking-wide transition-colors duration-300",
@@ -112,24 +116,28 @@ export default function Navbar() {
               })}
             </nav>
 
-            <div className="hidden lg:block">
-              <Button href="/reservierung" variant="primary" className="px-6 py-3">
-                Tisch reservieren
+            <div className="hidden items-center gap-4 lg:flex">
+              <LanguageSwitcher tone={solid ? "dark" : "light"} />
+              <Button href={localizedHref(locale, "/reservierung")} variant="primary" className="px-6 py-3">
+                {content.common.reserveCta}
               </Button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              className={cn(
-                "flex size-11 items-center justify-center rounded-full border transition-colors duration-300 lg:hidden",
-                solid ? "border-ink/20 text-ink" : "border-cream/50 text-cream"
-              )}
-              aria-label="Menü öffnen"
-              aria-expanded={menuOpen}
-            >
-              <Menu className="size-5" aria-hidden="true" />
-            </button>
+            <div className="flex items-center gap-3 lg:hidden">
+              <LanguageSwitcher tone={solid ? "dark" : "light"} />
+              <button
+                type="button"
+                onClick={() => setMenuOpen(true)}
+                className={cn(
+                  "flex size-11 items-center justify-center rounded-full border transition-colors duration-300",
+                  solid ? "border-ink/20 text-ink" : "border-cream/50 text-cream"
+                )}
+                aria-label={content.common.menuOpenLabel}
+                aria-expanded={menuOpen}
+              >
+                <Menu className="size-5" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </Container>
       </header>

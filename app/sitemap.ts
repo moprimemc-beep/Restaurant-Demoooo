@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-
-const siteUrl = "https://trattoria-bellavista.example.com";
+import { locales } from "@/lib/i18n";
+import { siteUrl } from "@/lib/seo";
 
 const routes = [
   "",
@@ -14,10 +14,15 @@ const routes = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return routes.map((route) => ({
-    url: `${siteUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : 0.7,
-  }));
+  return locales.flatMap((locale) =>
+    routes.map((route) => ({
+      url: `${siteUrl}/${locale}${route}`,
+      lastModified: new Date(),
+      changeFrequency: route === "" ? ("weekly" as const) : ("monthly" as const),
+      priority: route === "" ? 1 : 0.7,
+      alternates: {
+        languages: Object.fromEntries(locales.map((loc) => [loc, `${siteUrl}/${loc}${route}`])),
+      },
+    }))
+  );
 }

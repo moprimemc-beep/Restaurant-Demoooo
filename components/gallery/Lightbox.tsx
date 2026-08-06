@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import type { GalleryImage } from "@/components/gallery/GalleryGrid";
+import { useLocale } from "@/lib/locale-context";
 
 export default function Lightbox({
   images,
@@ -21,6 +22,7 @@ export default function Lightbox({
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
   const current = images[index];
+  const { content } = useLocale();
 
   useEffect(() => {
     previouslyFocused.current = document.activeElement as HTMLElement;
@@ -82,7 +84,7 @@ export default function Lightbox({
         type="button"
         onClick={onClose}
         className="absolute right-4 top-4 flex size-11 items-center justify-center rounded-full border border-cream/30 text-cream transition-colors hover:border-accent hover:text-accent sm:right-8 sm:top-8"
-        aria-label="Bild schließen"
+        aria-label={content.common.closeImageLabel}
       >
         <X className="size-5" aria-hidden="true" />
       </button>
@@ -91,7 +93,7 @@ export default function Lightbox({
         type="button"
         onClick={() => onNavigate((index - 1 + images.length) % images.length)}
         className="absolute left-3 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-cream/30 text-cream transition-colors hover:border-accent hover:text-accent sm:left-8"
-        aria-label="Vorheriges Bild"
+        aria-label={content.common.previousImageLabel}
       >
         <ChevronLeft className="size-5" aria-hidden="true" />
       </button>
@@ -111,7 +113,7 @@ export default function Lightbox({
         type="button"
         onClick={() => onNavigate((index + 1) % images.length)}
         className="absolute right-3 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-cream/30 text-cream transition-colors hover:border-accent hover:text-accent sm:right-8"
-        aria-label="Nächstes Bild"
+        aria-label={content.common.nextImageLabel}
       >
         <ChevronRight className="size-5" aria-hidden="true" />
       </button>

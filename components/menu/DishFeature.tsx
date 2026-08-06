@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { Dish } from "@/lib/data";
+import type { Dish } from "@/lib/content";
 
 export default function DishFeature({ dish }: { dish: Dish }) {
   if (!dish.image) return null;

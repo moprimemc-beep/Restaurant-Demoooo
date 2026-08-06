@@ -5,16 +5,19 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { restaurant } from "@/lib/data";
+import { localizedHref } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 
 export default function Hero() {
   const shouldReduceMotion = useReducedMotion();
+  const { locale, content } = useLocale();
+  const { home } = content;
 
   return (
     <section className="tone-dark relative flex min-h-[100svh] items-end overflow-hidden bg-secondary">
       <Image
         src="/images/exterior-facade-night.png"
-        alt="Beleuchtete Fassade der Trattoria Bellavista am Abend mit rotem Vordach und der Aufschrift Cucina Italiana"
+        alt={content.galleryImages[0].alt}
         fill
         priority
         sizes="100vw"
@@ -36,21 +39,21 @@ export default function Hero() {
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-accent">
-            {restaurant.name} · {restaurant.city} · {restaurant.type}
+            {home.hero.metaLine}
           </p>
           <h1 className="mt-6 max-w-3xl text-balance font-display text-5xl italic leading-[1.05] text-cream sm:text-7xl lg:text-[5.5rem]">
-            Italien genießen —<br className="hidden sm:block" /> Bissen für Bissen.
+            {home.hero.headlineLine1}
+            <br className="hidden sm:block" /> {home.hero.headlineLine2}
           </h1>
           <p className="mt-7 max-w-xl text-balance text-base leading-relaxed text-cream/85 sm:text-lg">
-            Traditionelle italienische Küche mit frischen Zutaten, hausgemachter Pasta
-            und knuspriger Steinofenpizza — mitten in {restaurant.city}.
+            {home.hero.subtext}
           </p>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Button href="/reservierung" variant="primary">
-              Tisch reservieren
+            <Button href={localizedHref(locale, "/reservierung")} variant="primary">
+              {home.hero.ctaPrimary}
             </Button>
-            <Button href="/speisekarte" variant="ghost">
-              Speisekarte ansehen
+            <Button href={localizedHref(locale, "/speisekarte")} variant="ghost">
+              {home.hero.ctaSecondary}
             </Button>
           </div>
         </motion.div>
