@@ -1,17 +1,21 @@
 import SectionHeading from "@/components/ui/SectionHeading";
 import Container from "@/components/ui/Container";
 import { RevealGroup, RevealItem } from "@/components/motion/RevealGroup";
-import { restaurant, values } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import type { Locale } from "@/lib/i18n";
 
-export default function Philosophy() {
+export default function Philosophy({ locale }: { locale: Locale }) {
+  const content = getContent(locale);
+  const { restaurant, values, home } = content;
+
   return (
     <section className="bg-background py-24 sm:py-32">
       <Container>
         <div className="grid gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24">
           <SectionHeading
-            number="01"
-            eyebrow="Unsere Philosophie"
-            title="Was der Trattoria Bellavista wichtig ist."
+            number={home.philosophy.number}
+            eyebrow={home.philosophy.eyebrow}
+            title={home.philosophy.title}
             description={restaurant.philosophy}
           />
 

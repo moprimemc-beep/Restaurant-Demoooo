@@ -1,7 +1,8 @@
 import SectionHeading from "@/components/ui/SectionHeading";
 import Container from "@/components/ui/Container";
 import { RevealGroup, RevealItem } from "@/components/motion/RevealGroup";
-import { team } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import type { Locale } from "@/lib/i18n";
 
 function initials(name: string) {
   return name
@@ -10,19 +11,22 @@ function initials(name: string) {
     .join("");
 }
 
-export default function TeamGrid() {
+export default function TeamGrid({ locale }: { locale: Locale }) {
+  const content = getContent(locale);
+  const { team } = content.aboutPage;
+
   return (
     <section className="bg-surface py-24 sm:py-32">
       <Container>
         <SectionHeading
-          number="04"
-          eyebrow="Unser Team"
-          title="Die Menschen dahinter."
-          description="Fünf Menschen, die jeden Tag dafür sorgen, dass sich die Trattoria Bellavista wie ein Stück Italien anfühlt."
+          number={team.number}
+          eyebrow={team.eyebrow}
+          title={team.title}
+          description={team.description}
         />
 
         <RevealGroup className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {team.map((member) => (
+          {content.team.map((member) => (
             <RevealItem key={member.name}>
               <div className="flex h-full flex-col rounded-[1.5rem] bg-cream p-7 shadow-card">
                 <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 font-display text-lg italic text-primary">

@@ -1,4 +1,4 @@
-import type { Dish } from "@/lib/data";
+import type { Dish } from "@/lib/content";
 
 export default function DishRow({ dish }: { dish: Dish }) {
   return (

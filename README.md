@@ -14,7 +14,9 @@ verwendeten Fotos stammen aus dem bereitgestellten Bildmaterial der
 "Trattoria Bellavista"-Markenwelt.
 
 **Seiten:** Start, Speisekarte, Galerie, Über uns, Reservierung, Kontakt,
-Impressum, Datenschutz, 404.
+Impressum, Datenschutz, 404 — jeweils vollständig auf **Englisch (Standard)
+und Deutsch**, umschaltbar über den Sprachwechsler in Desktop-Navigation und
+mobilem Menü.
 
 ## Installation
 
@@ -35,17 +37,20 @@ npm run start   # Produktions-Server (nach dem Build)
 ## Projektstruktur
 
 ```
-app/                    Next.js App Router Seiten & Routen
-  speisekarte/           Speisekarte
-  galerie/                Galerie mit Lightbox
-  ueber-uns/              Über uns / Team
-  reservierung/           Reservierungsformular
-  kontakt/                Kontakt & Formular
-  impressum/, datenschutz/  Rechtliche Seiten
-  not-found.tsx           404-Seite
-  sitemap.ts, robots.ts, manifest.ts  SEO/PWA-Routen
+app/
+  [locale]/               Lokalisierte Routen (en/de), Root-Layout mit <html lang>
+    speisekarte/           Speisekarte
+    galerie/                Galerie mit Lightbox
+    ueber-uns/              Über uns / Team
+    reservierung/           Reservierungsformular
+    kontakt/                Kontakt & Formular
+    impressum/, datenschutz/  Rechtliche Seiten
+    not-found.tsx           404-Seite (lokalisiert)
+    layout.tsx              Root-Layout inkl. LocaleProvider, Navbar, Footer
+  sitemap.ts, robots.ts, manifest.ts  SEO/PWA-Routen (locale-übergreifend)
+proxy.ts                  Leitet "/" und unpräfixierte Pfade auf "/en" um
 components/
-  layout/                 Navbar, MobileMenu, Footer
+  layout/                 Navbar, MobileMenu, Footer, LanguageSwitcher
   ui/                     Button, Container, PageHero, SectionHeading, ...
   sections/               Startseiten-Abschnitte (Hero, Philosophy, ...)
   menu/                   Speisekarten-Komponenten
@@ -53,8 +58,11 @@ components/
   forms/                  Reservierungs-/Kontakt-/Newsletter-Formulare
   motion/                 Framer-Motion Reveal-Wrapper
 lib/
-  data.ts                 Zentrale Inhalte (Restaurant, Speisekarte, Team, ...)
-  schemas.ts               Zod-Validierungsschemas
+  content/                Content-Wörterbücher: types.ts, en.ts, de.ts, index.ts
+  i18n.ts                 Locale-Konfiguration & URL-Helfer
+  locale-context.tsx       React-Context für Client-Komponenten (useLocale)
+  seo.ts                   Canonical-/hreflang-Helfer
+  schemas.ts               Zod-Validierungsschemas (lokalisierte Fehlermeldungen)
   utils.ts
 public/images/            Bereitgestellte Fotos & Logo
 ```
@@ -79,12 +87,33 @@ nach hellem/dunklem Sektionshintergrund umschaltet).
 Standard). Beide über `next/font/google` geladen (kein Render-Blocking, kein
 Layout-Shift durch `display: swap`).
 
+## Mehrsprachigkeit (i18n)
+
+Die Website ist unter `/en/...` (Standard) und `/de/...` vollständig
+zweisprachig. `proxy.ts` (Next.js 16 Nachfolger von `middleware.ts`) leitet
+"/" und alle unpräfixierten Pfade automatisch auf `/en` um — die englische
+Version wird beim Aufruf der Domain immer zuerst angezeigt.
+
+- **Sprachwechsler:** `components/layout/LanguageSwitcher.tsx`, sichtbar als
+  EN/DE-Umschalter in der Desktop-Navigation (neben dem CTA-Button) und im
+  mobilen Menü-Overlay. Er behält den aktuellen Pfad bei (z. B. wechselt man
+  von `/en/speisekarte` zu `/de/speisekarte`).
+- **Server Components** (Seiten) laden Inhalte über `getContent(locale)`
+  direkt aus `params`.
+- **Client Components** (Navbar, Formulare, Lightbox, …) lesen Sprache und
+  Inhalte über den `useLocale()`-Hook aus `lib/locale-context.tsx`, der im
+  Root-Layout pro Sprachroute bereitgestellt wird.
+- Beide Wörterbücher (`lib/content/en.ts`, `lib/content/de.ts`) erfüllen
+  denselben TypeScript-Typ (`lib/content/types.ts`) — fehlende Übersetzungen
+  fallen dadurch beim Build als Typfehler auf, nicht erst zur Laufzeit.
+
 ## Content-Konfiguration
 
 Alle Texte, Preise, Öffnungszeiten und Kontaktdaten liegen zentral in
-`lib/data.ts`. Um die Website auf ein anderes (fiktives oder echtes)
-Restaurant umzustellen, genügt es, diese Datei anzupassen — alle Seiten
-beziehen ihre Inhalte von dort.
+`lib/content/en.ts` und `lib/content/de.ts`. Um die Website auf ein anderes
+(fiktives oder echtes) Restaurant umzustellen, genügt es, diese beiden
+Dateien anzupassen — alle Seiten und Komponenten beziehen ihre Inhalte von
+dort über `getContent(locale)` bzw. `useLocale()`.
 
 ## Bild-Konfiguration
 
@@ -99,19 +128,24 @@ Karten-Design verwendet.
 
 - Individuelle `metadata` (Title/Description/Canonical) je Seite
 - OpenGraph- & Twitter-Card-Bild: `public/images/og-image.jpg`
-- `Restaurant`-Schema.org JSON-LD (Adresse, Öffnungszeiten) in `app/layout.tsx`
-- `app/sitemap.ts`, `app/robots.ts`, `app/manifest.ts`
+- `Restaurant`-Schema.org JSON-LD (Adresse, Öffnungszeiten) in
+  `app/[locale]/layout.tsx`
+- `app/sitemap.ts` listet jede Seite für beide Sprachen inkl.
+  `hreflang`-Alternates, `app/robots.ts`, `app/manifest.ts`
+- Jede Seite setzt `alternates.canonical` und `alternates.languages`
+  (`lib/seo.ts`) für korrekte `hreflang`-Verlinkung zwischen `/en/...` und
+  `/de/...`
 - Impressum/Datenschutz sind per `robots: noindex` von der Indexierung
   ausgeschlossen
 
 **Wichtig:** `metadataBase`/Sitemap/robots.txt verwenden aktuell die
-Platzhalter-Domain `https://trattoria-bellavista.example.com`. Vor einem
-echten Launch muss diese in `app/layout.tsx`, `app/sitemap.ts` und
-`app/robots.ts` durch die finale Domain ersetzt werden.
+Platzhalter-Domain `https://trattoria-bellavista.example.com`
+(`lib/seo.ts`). Vor einem echten Launch muss diese dort sowie in
+`app/[locale]/layout.tsx` durch die finale Domain ersetzt werden.
 
 ## Mobile Viewport & Zoom-Sperre
 
-`app/layout.tsx` exportiert `viewport` mit `minimumScale: 1, maximumScale: 1,
+`app/[locale]/layout.tsx` exportiert `viewport` mit `minimumScale: 1, maximumScale: 1,
 userScalable: false` (kein Pinch-Zoom), während vertikales Scrollen jederzeit
 uneingeschränkt funktioniert. Scroll-Sperren (mobiles Menü, Lightbox) setzen
 temporär `overflow: hidden` nur auf `document.body` und stellen den Zustand
@@ -145,9 +179,9 @@ werden.
 Vor einem echten Go-Live (bzw. bevor diese Demo als reale Website verwendet
 wird) sollten folgende Punkte geprüft bzw. ergänzt werden:
 
-- [ ] Finale Domain in `app/layout.tsx`, `app/sitemap.ts`, `app/robots.ts` eintragen
+- [ ] Finale Domain in `lib/seo.ts` und `app/[locale]/layout.tsx` eintragen
 - [ ] Canonical-URLs mit finaler Domain abgleichen
-- [ ] Echte Social-Media-URLs hinterlegen (aktuell nur Platzhalter-Handles ohne Links, siehe `lib/data.ts`)
+- [ ] Echte Social-Media-URLs hinterlegen (aktuell nur Platzhalter-Handles ohne Links, siehe `lib/content/en.ts` / `de.ts`)
 - [ ] Impressumsangaben (Rechtsform, vertretungsberechtigte Person, ggf. Handelsregister/USt-ID) rechtssicher vervollständigen
 - [ ] Datenschutzerklärung von rechtskundiger Stelle prüfen lassen
 - [ ] Bildrechte der verwendeten Fotos klären (aktuell Demo-Bildmaterial)

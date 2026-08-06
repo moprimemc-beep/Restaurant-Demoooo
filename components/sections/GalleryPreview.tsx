@@ -3,23 +3,26 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Container from "@/components/ui/Container";
 import TextLink from "@/components/ui/TextLink";
 import Reveal from "@/components/motion/Reveal";
-import { galleryImages } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import { localizedHref, type Locale } from "@/lib/i18n";
 
-const preview = galleryImages.slice(0, 5);
+export default function GalleryPreview({ locale }: { locale: Locale }) {
+  const content = getContent(locale);
+  const preview = content.galleryImages.slice(0, 5);
+  const { galleryPreview } = content.home;
 
-export default function GalleryPreview() {
   return (
     <section className="bg-background py-24 sm:py-32">
       <Container>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <SectionHeading
-            number="04"
-            eyebrow="Einblicke"
-            title="Ein Abend bei uns."
-            description="Steinofen, Weinregal und Kerzenlicht — ein Blick in Küche, Gastraum und Terrasse."
+            number={galleryPreview.number}
+            eyebrow={galleryPreview.eyebrow}
+            title={galleryPreview.title}
+            description={galleryPreview.description}
           />
           <div className="hidden sm:block">
-            <TextLink href="/galerie">Ganze Galerie</TextLink>
+            <TextLink href={localizedHref(locale, "/galerie")}>{content.common.fullGalleryLink}</TextLink>
           </div>
         </div>
 
@@ -51,7 +54,7 @@ export default function GalleryPreview() {
         </div>
 
         <div className="mt-10 sm:hidden">
-          <TextLink href="/galerie">Ganze Galerie</TextLink>
+          <TextLink href={localizedHref(locale, "/galerie")}>{content.common.fullGalleryLink}</TextLink>
         </div>
       </Container>
     </section>

@@ -1,22 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import Field, { inputClasses } from "@/components/forms/Field";
 import Button from "@/components/ui/Button";
-import { contactSchema, type ContactValues } from "@/lib/schemas";
+import { createContactSchema, type ContactValues } from "@/lib/schemas";
+import { localizedHref } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const { locale, content } = useLocale();
+  const form = content.contactPage.form;
+  const schema = useMemo(() => createContactSchema(form.errors), [form.errors]);
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<ContactValues>({
-    resolver: zodResolver(contactSchema),
+    resolver: zodResolver(schema),
     defaultValues: { name: "", email: "", subject: "", message: "", privacy: undefined },
   });
 
@@ -34,13 +40,10 @@ export default function ContactForm() {
         className="flex flex-col items-center gap-4 rounded-[1.5rem] bg-cream p-10 text-center shadow-card"
       >
         <CheckCircle2 className="size-10 text-secondary" aria-hidden="true" />
-        <h3 className="font-display text-2xl text-ink">Nachricht erfasst</h3>
-        <p className="max-w-md text-sm leading-relaxed text-ink-soft">
-          Vielen Dank für Ihre Nachricht. Da dies eine Demo-Website ohne angebundenen
-          Mail-Versand ist, wurde keine echte Nachricht gesendet.
-        </p>
+        <h3 className="font-display text-2xl text-ink">{form.successTitle}</h3>
+        <p className="max-w-md text-sm leading-relaxed text-ink-soft">{form.successText}</p>
         <Button variant="secondary" onClick={() => setStatus("idle")}>
-          Weitere Nachricht senden
+          {form.successButton}
         </Button>
       </div>
     );
@@ -49,7 +52,7 @@ export default function ContactForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2">
-        <Field id="c-name" label="Name" required error={errors.name?.message}>
+        <Field id="c-name" label={form.name} required error={errors.name?.message}>
           <input
             id="c-name"
             type="text"
@@ -59,7 +62,7 @@ export default function ContactForm() {
             {...register("name")}
           />
         </Field>
-        <Field id="c-email" label="E-Mail" required error={errors.email?.message}>
+        <Field id="c-email" label={form.email} required error={errors.email?.message}>
           <input
             id="c-email"
             type="email"
@@ -71,7 +74,7 @@ export default function ContactForm() {
         </Field>
       </div>
 
-      <Field id="c-subject" label="Betreff" required error={errors.subject?.message}>
+      <Field id="c-subject" label={form.subject} required error={errors.subject?.message}>
         <input
           id="c-subject"
           type="text"
@@ -81,7 +84,7 @@ export default function ContactForm() {
         />
       </Field>
 
-      <Field id="c-message" label="Nachricht" required error={errors.message?.message}>
+      <Field id="c-message" label={form.message} required error={errors.message?.message}>
         <textarea
           id="c-message"
           rows={5}
@@ -100,11 +103,11 @@ export default function ContactForm() {
           {...register("privacy")}
         />
         <label htmlFor="c-privacy" className="text-sm text-ink-soft">
-          Ich habe die{" "}
-          <a href="/datenschutz" className="underline hover:text-primary">
-            Datenschutzerklärung
+          {form.privacyPrefix}{" "}
+          <a href={localizedHref(locale, "/datenschutz")} className="underline hover:text-primary">
+            {form.privacyLink}
           </a>{" "}
-          gelesen und stimme der Verarbeitung meiner Daten zu.
+          {form.privacySuffix}
         </label>
       </div>
       {errors.privacy && (
@@ -117,10 +120,10 @@ export default function ContactForm() {
         {status === "submitting" ? (
           <>
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            Wird gesendet …
+            {form.submitting}
           </>
         ) : (
-          "Nachricht senden"
+          form.submit
         )}
       </Button>
     </form>

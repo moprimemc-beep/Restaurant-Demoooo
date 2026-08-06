@@ -1,7 +1,7 @@
 import Reveal from "@/components/motion/Reveal";
 import DishRow from "@/components/menu/DishRow";
 import DishFeature from "@/components/menu/DishFeature";
-import type { MenuCategory } from "@/lib/data";
+import type { MenuCategory } from "@/lib/content";
 import Container from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
 

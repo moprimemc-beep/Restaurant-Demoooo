@@ -1,8 +1,15 @@
+"use client";
+
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
+import { localizedHref } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-context";
 
 export default function NotFound() {
+  const { locale, content } = useLocale();
+  const { notFound } = content;
+
   return (
     <section className="tone-dark relative flex min-h-[85svh] items-center overflow-hidden bg-secondary text-cream">
       <Image
@@ -21,21 +28,19 @@ export default function NotFound() {
         aria-hidden="true"
       />
       <Container className="relative z-10 text-center">
-        <span className="font-display text-2xl italic text-accent">404</span>
+        <span className="font-display text-2xl italic text-accent">{notFound.eyebrow}</span>
         <h1 className="mt-4 text-balance font-display text-4xl italic leading-tight sm:text-5xl">
-          Dieser Tisch ist leider nicht gedeckt.
+          {notFound.title}
         </h1>
         <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-cream/80">
-          Die gesuchte Seite existiert nicht oder wurde verschoben. Kehren Sie
-          zurück zur Startseite oder werfen Sie einen Blick in unsere
-          Speisekarte.
+          {notFound.description}
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button href="/" variant="primary">
-            Zur Startseite
+          <Button href={localizedHref(locale, "/")} variant="primary">
+            {notFound.ctaHome}
           </Button>
-          <Button href="/speisekarte" variant="ghost">
-            Speisekarte ansehen
+          <Button href={localizedHref(locale, "/speisekarte")} variant="ghost">
+            {notFound.ctaMenu}
           </Button>
         </div>
       </Container>
